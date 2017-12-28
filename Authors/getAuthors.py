@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+import codecs
+from xml.sax import handler,make_parser
+paper_tag = ('article','inproceedings','proceedings','book',
+              'incollection','phdthesis','mastersthesis','www')
+class mHandler(handler.ContentHandler):
+    def __init__(self,result):
+        self.result = result
+        self.flag = 0
+
+    def startDocument(self):
+        print("Document Start")
+
+    def endDocument(self):
+        print("Decument End")
+
+    def startElement(self,name,attrs):
+        if name == 'author':
+            self.flag = 1
+
+    def endElement(self, name):
+        if name == 'author':
+            self.result.write(',')
+            self.flag = 0
+        if (name in paper_tag):
+            self.result.write('\r\n')
+
+    def characters(self,chrs):
+        if self.flag:
+            self.result.write(chrs)
+
+def parserDblpXml(souce,result):
+    handler = mHandler(result)
+    parser = make_parser()
+    parser.setContentHandler(handler)
+
+    parser.parse(souce)
+
+if __name__ == '__main__':
+    source = codecs.open('/home/admin/data/dblp.xml','r','utf-8')
+    result = codecs.open('/home/admin/dataauthors.txt','r','utf-8')
+    parserDblpXml(source,result)
+    result.close()
+    source.close()
